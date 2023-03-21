@@ -9,6 +9,11 @@ import javax.enterprise.context.ApplicationScoped
 @ApplicationScoped
 class AppConfig(
     /**
+     * Server ID
+     */
+    @ConfigProperty(name = "app.server-id")
+    val serverId: String,
+    /**
      * Path of JNI Lib (the `.so` file)
      */
     @ConfigProperty(name = "app.path.lib")
@@ -21,10 +26,10 @@ class AppConfig(
     val chrootPath: String,
 
     /**
-     * Path for chdir
+     * Root path for chdir
      */
     @ConfigProperty(name = "app.path.chdir")
-    val chdirPath: String,
+    val chdirRootPath: String,
 
     /**
      * Path for home (the `chdir` inside)

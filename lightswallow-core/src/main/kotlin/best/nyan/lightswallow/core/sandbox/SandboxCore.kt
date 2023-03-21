@@ -40,6 +40,7 @@ class SandboxCore(
             }
         }.start()
 
+        // Output Check Thread
         if (parameter.outputLimit >= 0) {
             object : Thread() {
                 val startTime = System.currentTimeMillis()

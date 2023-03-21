@@ -21,8 +21,8 @@ class LightSwallowServerLifecycle(
         loadSystemLibrary(appConfig.libPath)
 
         // Check necessary directories
-        if(!checkDirectoryExists(appConfig.chrootPath) || !checkDirectoryExists(appConfig.chdirPath))
-            throw IOException("Could not found the chroot | chdir path, please ensure they are exists.")
+        if (!checkDirectoryExists(appConfig.chrootPath) || !checkDirectoryExists(appConfig.chdirRootPath))
+            throw IOException("Could not found the chroot | chdir-root path, please ensure they are exists.")
     }
 
 }

@@ -103,6 +103,12 @@ data class ProcessParameter(
         return this
     }
 
+    fun paramPathReplace(oldValue: String, newValue: String) {
+        stdin = stdin.replace(oldValue, newValue)
+        stdout = stdout.replace(oldValue, newValue)
+        stderr = stderr.replace(oldValue, newValue)
+    }
+
 }
 
 /**

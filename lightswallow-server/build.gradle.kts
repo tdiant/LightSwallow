@@ -17,6 +17,9 @@ dependencies {
     implementation("io.quarkus:quarkus-resteasy-reactive-jackson")
     implementation("io.quarkus:quarkus-resteasy-reactive-kotlin")
 
+    // RabbitMQ Message Queue
+    implementation("io.quarkus:quarkus-smallrye-reactive-messaging-rabbitmq")
+
     // Config
     implementation("io.quarkus:quarkus-config-yaml")
 
