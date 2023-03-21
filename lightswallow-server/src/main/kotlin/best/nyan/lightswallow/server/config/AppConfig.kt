@@ -17,23 +17,5 @@ class AppConfig(
      * Path of JNI Lib (the `.so` file)
      */
     @ConfigProperty(name = "app.path.lib")
-    val libPath: String,
-
-    /**
-     * Path for chroot
-     */
-    @ConfigProperty(name = "app.path.chroot")
-    val chrootPath: String,
-
-    /**
-     * Root path for chdir
-     */
-    @ConfigProperty(name = "app.path.chdir")
-    val chdirRootPath: String,
-
-    /**
-     * Path for home (the `chdir` inside)
-     */
-    @ConfigProperty(name = "app.path.home")
-    val homePath: String
+    val libPath: String
 )

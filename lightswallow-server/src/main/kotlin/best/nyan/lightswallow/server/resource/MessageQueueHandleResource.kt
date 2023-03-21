@@ -18,9 +18,6 @@ class MessageQueueHandleResource(
     @Acknowledgment(value = Acknowledgment.Strategy.POST_PROCESSING)
     fun handleRequest(request: SandboxRunnableRequest): SandboxRunnableRequestResult {
         return request.runAndWait(
-            chrootPath = appConfig.chrootPath,
-            chdirRootPath = appConfig.chdirRootPath,
-            homePath = appConfig.homePath,
             serverId = appConfig.serverId
         )
     }

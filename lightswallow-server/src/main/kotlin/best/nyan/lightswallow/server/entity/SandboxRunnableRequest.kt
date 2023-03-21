@@ -26,14 +26,21 @@ class SandboxRunnableRequest(
     /**
      * Path replacement rules
      */
-    val pathReplacement: Map<String, String> = mapOf()
+    val pathReplacement: Map<String, String> = mapOf(),
+    /**
+     * Path of chroot
+     */
+    val chrootPath: String,
+    /**
+     * Path of chdir root
+     */
+    val chdirRootPath: String,
+    /**
+     * Path of home (working directory inside the sandbox)
+     */
+    val homePath: String
 ) {
-    fun runAndWait(
-        chrootPath: String,
-        chdirRootPath: String,
-        homePath: String,
-        serverId: String
-    ): SandboxRunnableRequestResult {
+    fun runAndWait(serverId: String): SandboxRunnableRequestResult {
         val startTime = System.currentTimeMillis()
 
         // Check directory exists
