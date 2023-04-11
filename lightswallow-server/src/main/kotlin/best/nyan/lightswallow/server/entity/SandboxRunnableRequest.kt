@@ -18,9 +18,13 @@ import kotlin.io.path.pathString
  */
 class SandboxRunnableRequest(
     /**
+     * ID
+     */
+    val id: String = UUID.randomUUID().toString() + "_${System.currentTimeMillis()}",
+    /**
      * Tasks need to run
      */
-    val tasks: List<SandboxRunnableRequestTask>,
+    val tasks: List<SandboxRunnableRequestTask> = listOf(),
     /**
      * Path replacement rules
      */
@@ -28,15 +32,15 @@ class SandboxRunnableRequest(
     /**
      * Path of chroot
      */
-    val chrootPath: String,
+    val chrootPath: String = "/",
     /**
      * Path of chdir root
      */
-    val chdirRootPath: String,
+    val chdirRootPath: String = "/home",
     /**
      * Path of home (working directory inside the sandbox)
      */
-    val homePath: String,
+    val homePath: String = "/home",
 
     /**
      * Delete chdir directory when all processes done
@@ -48,10 +52,6 @@ class SandboxRunnableRequest(
      */
     val readFromIOFiles: Boolean = false
 ) {
-    /**
-     * ID
-     */
-    val id: String = UUID.randomUUID().toString() + "_${System.currentTimeMillis()}"
 
     fun runAndWait(serverId: String): SandboxRunnableRequestResult {
         val startTime = System.currentTimeMillis()
@@ -109,6 +109,8 @@ class SandboxRunnableRequest(
                 it.sandboxParameter.stderr = ""
         }
 
+        val ioContentMap: MutableMap<String, Map<String, String>> = mutableMapOf()
+
         // Run and collect results
         val resultMap = buildMap {
             tasks.forEach { task ->
@@ -118,26 +120,21 @@ class SandboxRunnableRequest(
                     )
                 )
                 put(task.id, result)
+
+                if (readFromIOFiles) {
+                    ioContentMap[task.id] = buildMap {
+                        ensureIOAbsolutePath(task.sandboxParameter, task.sandboxParameter.stdout)?.let {
+                            put("out", readFileToString(it))
+                        }
+                        ensureIOAbsolutePath(task.sandboxParameter, task.sandboxParameter.stderr)?.let {
+                            put("err", readFileToString(it))
+                        }
+                    }
+                }
             }
         }
 
         val endTime = System.currentTimeMillis()
-
-        val ioContentMap: Map<String, Map<String, String>> =
-            if (readFromIOFiles) {
-                buildMap {
-                    tasks.forEach { task ->
-                        put(task.id, buildMap {
-                            ensureIOAbsolutePath(task.sandboxParameter, task.sandboxParameter.stdout)?.let {
-                                put("out", readFileToString(it))
-                            }
-                            ensureIOAbsolutePath(task.sandboxParameter, task.sandboxParameter.stderr)?.let {
-                                put("err", readFileToString(it))
-                            }
-                        })
-                    }
-                }
-            } else mapOf()
 
         Thread.sleep(0)
         System.gc()

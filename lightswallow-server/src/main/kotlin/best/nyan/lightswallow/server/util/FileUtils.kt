@@ -18,7 +18,7 @@ object FileUtils {
             return ""
         return BufferedReader(FileReader(file)).use { reader ->
             buildString {
-                reader.readLines().forEach { append(it) }
+                reader.readLines().forEach { append(it).append("\n") }
             }
         }
     }

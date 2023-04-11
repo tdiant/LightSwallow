@@ -67,8 +67,12 @@ class LightSwallowEntity(
                 task.sandboxParameter.apply {
                     this.chrootPath = this@LightSwallowEntity.chrootPath
                     this.chdirPath = this@LightSwallowEntity.homePath
-                    if (this.mounts.count { it.sourcePath == chdirPath } == 0)
-                        this.mounts += MountPair(sourcePath = chdirPath, targetPath = homePath, readonly = false)
+                    if (this.mounts.count { it.sourcePath == this@LightSwallowEntity.chrootPath } == 0)
+                        this.mounts += MountPair(
+                            sourcePath = this@LightSwallowEntity.chdirPath,
+                            targetPath = this@LightSwallowEntity.homePath,
+                            readonly = false
+                        )
                 }
             )
             status = SandboxStatus.READY
