@@ -17,5 +17,23 @@ class AppConfig(
      * Path of JNI Lib (the `.so` file)
      */
     @ConfigProperty(name = "app.path.lib")
-    val libPath: String
-)
+    val libPath: String,
+
+    /**
+     * Size of request handling thread pool
+     */
+    @ConfigProperty(name = "app.thread-pool-size")
+    val threadPoolSize: Int,
+
+    /**
+     * API Secret Key
+     */
+    @ConfigProperty(name = "app.secret-key", defaultValue = "")
+    val secretKey: String
+
+) {
+
+    fun verifySecretKey(secretKey: String) =
+        this.secretKey.isEmpty() || this.secretKey == secretKey
+
+}

@@ -2,9 +2,8 @@ package best.nyan.lightswallow.server
 
 import best.nyan.lightswallow.core.sandbox.loadSystemLibrary
 import best.nyan.lightswallow.server.config.AppConfig
-import best.nyan.lightswallow.server.util.FileUtils.checkDirectoryExists
+import io.quarkus.runtime.ShutdownEvent
 import io.quarkus.runtime.StartupEvent
-import java.io.IOException
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.event.Observes
 
@@ -20,9 +19,11 @@ class LightSwallowServerLifecycle(
         // Load libraries
         loadSystemLibrary(appConfig.libPath)
 
-        // Check necessary directories
-        if (!checkDirectoryExists(appConfig.chrootPath) || !checkDirectoryExists(appConfig.chdirRootPath))
-            throw IOException("Could not found the chroot | chdir-root path, please ensure they are exists.")
+        println("Server started")
+    }
+
+    fun onShutdown(@Observes ex: ShutdownEvent) {
+        println("Server shutdown")
     }
 
 }

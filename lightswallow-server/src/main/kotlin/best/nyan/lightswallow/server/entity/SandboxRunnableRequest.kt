@@ -66,13 +66,13 @@ class SandboxRunnableRequest(
 
         // Run and collect results
         val resultMap = buildMap {
-            tasks.forEach {
+            tasks.forEach { task ->
                 val result = sandbox.runTask(
                     LightSwallowEntityTask(
-                        sandboxParameter = it.sandboxParameter
+                        sandboxParameter = task.sandboxParameter
                     )
                 )
-                put(it.id, result)
+                put(task.id, result)
             }
         }
 

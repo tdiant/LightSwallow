@@ -7,9 +7,10 @@ description = "Daemon HTTP server for LightSwallow"
 val quarkusPlatformVersion: String by project
 
 dependencies {
+    implementation(project(mapOf("path" to ":lightswallow-core")))
+
     // Base
     implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:$quarkusPlatformVersion"))
-    implementation(project(mapOf("path" to ":lightswallow-core")))
     implementation("io.quarkus:quarkus-kotlin")
     implementation("io.quarkus:quarkus-arc")
 
@@ -31,6 +32,7 @@ dependencies {
 tasks.withType<Test> {
     systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
 }
+
 allOpen {
     annotation("javax.ws.rs.Path")
     annotation("javax.enterprise.context.ApplicationScoped")
