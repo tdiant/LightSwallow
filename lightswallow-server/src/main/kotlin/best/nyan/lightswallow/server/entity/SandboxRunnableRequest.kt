@@ -7,6 +7,7 @@ import best.nyan.lightswallow.core.result.ProcessResult
 import best.nyan.lightswallow.server.util.FileUtils.checkDirectoryExists
 import best.nyan.lightswallow.server.util.FileUtils.ensureFileExists
 import best.nyan.lightswallow.server.util.FileUtils.readFileToString
+import best.nyan.lightswallow.server.util.FileUtils.writeStringToFile
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -50,7 +51,12 @@ class SandboxRunnableRequest(
     /**
      * Read content from IO files after all processes finished up
      */
-    val readFromIOFiles: Boolean = false
+    val readFromIOFiles: Boolean = false,
+
+    /**
+     * Prepare files, written to sandbox before launching processes
+     */
+    val prepareFiles: Map<String, String> = mapOf()
 ) {
 
     fun runAndWait(serverId: String): SandboxRunnableRequestResult {
@@ -62,6 +68,12 @@ class SandboxRunnableRequest(
         val chdirPath = Path(chdirRootPath, id).pathString
         val chdirFile = File(chdirPath)
         chdirFile.mkdirs()
+
+        // Prepared files
+        prepareFiles.forEach { (filename, content) ->
+            val filePath = Path(chdirPath, filename).pathString
+            writeStringToFile(content, filePath)
+        }
 
         // Create sandbox entity
         val sandbox = LightSwallowEntity(
