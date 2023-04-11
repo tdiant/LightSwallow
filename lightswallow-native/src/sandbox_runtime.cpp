@@ -32,17 +32,25 @@ static void EnsureDirectoryExist(fs::path dir) {
     }
 }
 
+vector<int> needCloseFiles; //todo impl this
+
 void RedirectIO(const SandboxParameter &param, int nullfd) {
     const string &rdStdin = param.redirectStdin,
             rdStdout = param.redirectStdout,
             rdStderr = param.redirectStderr;
     int fdInput = nullfd, fdOutput = nullfd, fdError = nullfd;
-    if (!rdStdin.empty())
+    if (!rdStdin.empty()) {
         fdInput = ENSURE(open(rdStdin.c_str(), O_RDONLY));
-    if (!rdStdout.empty())
+        needCloseFiles.push_back(fdInput);
+    }
+    if (!rdStdout.empty()) {
         fdOutput = ENSURE(open(rdStdout.c_str(), O_WRONLY | O_TRUNC | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IWGRP));
-    if (!rdStderr.empty())
+        needCloseFiles.push_back(fdOutput);
+    }
+    if (!rdStderr.empty()) {
         fdError = ENSURE(open(rdStderr.c_str(), O_WRONLY | O_TRUNC | O_CREAT, S_IWUSR | S_IRUSR | S_IRGRP | S_IWGRP));
+        needCloseFiles.push_back(fdError);
+    }
 
     ENSURE(dup2(fdInput, STDIN_FILENO));
     ENSURE(dup2(fdOutput, STDOUT_FILENO));

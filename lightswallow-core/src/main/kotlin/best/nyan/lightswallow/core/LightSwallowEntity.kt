@@ -63,7 +63,14 @@ class LightSwallowEntity(
         status = SandboxStatus.RUNNING
         task.sandboxParameter.name = cgroupName
         try {
-            val result = sandboxCore.runProcess(task.sandboxParameter)
+            val result = sandboxCore.runProcess(
+                task.sandboxParameter.apply {
+                    this.chrootPath = this@LightSwallowEntity.chrootPath
+                    this.chdirPath = this@LightSwallowEntity.homePath
+                    if (this.mounts.count { it.sourcePath == chdirPath } == 0)
+                        this.mounts += MountPair(sourcePath = chdirPath, targetPath = homePath, readonly = false)
+                }
+            )
             status = SandboxStatus.READY
             return result
         } catch (e: Exception) {

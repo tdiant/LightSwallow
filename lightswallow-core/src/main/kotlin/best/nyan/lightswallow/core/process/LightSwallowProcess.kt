@@ -63,7 +63,7 @@ class LightSwallowProcess(
 
         //Time usage
         val usageSubTime = System.currentTimeMillis() - startTime  //Time counted by TimeLimitExceededCheckThread
-        val usageCgroupTime = sandboxHook.readTimeUsage(name)  //Time counted by Linux cgroup cpuacct
+        val usageCgroupTime = sandboxHook.readTimeUsage(name) / 1000 / 1000  //Time counted by cgroup cpuacct (ns)
         val timeUsage = max(usageCgroupTime, usageSubTime)
 
         val execResultCode = execResultArr[0]
@@ -89,6 +89,8 @@ class LightSwallowProcess(
                 )
             }
 
+            sandboxHook.destroyEnvironment(name, true)
+
             //todo
 
             return ProcessResult(ProcessResultType.SUCCESS_EXIT, timeUsage, memoryUsage, execResultCode)
@@ -104,7 +106,7 @@ class LightSwallowProcess(
         if (!registerFlag)
             return
 //            throw RuntimeException("Cannot destroy process environment before starting the process")
-        sandboxHook.destroyEnvironment(name, false)
+        sandboxHook.destroyEnvironment(name, true)
         registerFlag = false
     }
 }

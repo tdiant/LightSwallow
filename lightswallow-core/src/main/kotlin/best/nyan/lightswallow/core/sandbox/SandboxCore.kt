@@ -64,6 +64,7 @@ class SandboxCore(
         }
 
         val result = process.start()
+        process.destroy()
 
         if (timeLimitKillFlag)
             return ProcessResult(
@@ -80,8 +81,6 @@ class SandboxCore(
                 parameter.memoryLimit + 1,
                 result.returnCode
             )
-
-        process.destroy()
 
         return result
     }

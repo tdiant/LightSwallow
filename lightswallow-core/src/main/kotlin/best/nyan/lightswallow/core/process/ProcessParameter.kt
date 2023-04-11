@@ -94,6 +94,12 @@ data class ProcessParameter(
     var stderr: String = "",
 ) {
 
+    init {
+        this.parameters = toSafetyJavaList(this.parameters)
+        this.mounts = toSafetyJavaList(this.mounts)
+        this.environments = toSafetyJavaList(this.environments)
+    }
+
     /**
      * Set the executable and parameters
      */

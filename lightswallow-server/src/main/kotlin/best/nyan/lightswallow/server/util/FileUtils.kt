@@ -29,10 +29,26 @@ object FileUtils {
     fun checkFileExists(path: String): Boolean =
         File(path).let { it.exists() && it.isFile }
 
+    fun ensureFileExists(path: String): Boolean {
+        if (path.isEmpty())
+            return false
+        return if (!checkFileExists(path)) {
+            try {
+                File(path).createNewFile()
+                true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
+        } else true
+    }
+
     fun writeStringToFile(content: String, filePath: String) {
         val file = File(filePath)
-        if (!file.exists())
+        if (!file.exists()) {
+            file.parentFile.mkdirs()
             file.createNewFile()
+        }
 
         FileWriter(file).use { writer ->
             writer.write(content)

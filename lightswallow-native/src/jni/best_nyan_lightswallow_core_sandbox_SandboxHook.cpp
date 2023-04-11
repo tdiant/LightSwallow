@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <unistd.h>
 
 using std::vector;
 using std::cout;
@@ -30,6 +31,10 @@ JNIEXPORT jintArray JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook
 
         jintArray bufArr = env->NewIntArray(bufferSize);
         env->SetIntArrayRegion(bufArr, 0, bufferSize, byteBuffer);
+
+        dup2(STDIN_FILENO, STDIN_FILENO);
+        dup2(STDOUT_FILENO, STDOUT_FILENO);
+        dup2(STDERR_FILENO, STDERR_FILENO);
 
         return bufArr;
     }

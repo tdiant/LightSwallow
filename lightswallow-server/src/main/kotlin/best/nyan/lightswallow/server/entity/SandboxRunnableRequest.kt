@@ -5,6 +5,7 @@ import best.nyan.lightswallow.core.LightSwallowEntityTask
 import best.nyan.lightswallow.core.process.ProcessParameter
 import best.nyan.lightswallow.core.result.ProcessResult
 import best.nyan.lightswallow.server.util.FileUtils.checkDirectoryExists
+import best.nyan.lightswallow.server.util.FileUtils.ensureFileExists
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -15,10 +16,6 @@ import kotlin.io.path.pathString
  * The batch tasks for LightSwallow sandbox to run
  */
 class SandboxRunnableRequest(
-    /**
-     * ID
-     */
-    val id: String = UUID.randomUUID().toString() + "_${System.currentTimeMillis()}",
     /**
      * Tasks need to run
      */
@@ -38,8 +35,18 @@ class SandboxRunnableRequest(
     /**
      * Path of home (working directory inside the sandbox)
      */
-    val homePath: String
+    val homePath: String,
+
+    /**
+     * Delete chdir directory when all processes done
+     */
+    val deleteDirectoryWhenFinished: Boolean = true
 ) {
+    /**
+     * ID
+     */
+    val id: String = UUID.randomUUID().toString() + "_${System.currentTimeMillis()}"
+
     fun runAndWait(serverId: String): SandboxRunnableRequestResult {
         val startTime = System.currentTimeMillis()
 
@@ -47,7 +54,8 @@ class SandboxRunnableRequest(
         if (!checkDirectoryExists(chrootPath))
             throw IOException("Target path not exists")
         val chdirPath = Path(chdirRootPath, id).pathString
-        File(chdirPath).mkdirs()
+        val chdirFile = File(chdirPath)
+        chdirFile.mkdirs()
 
         // Create sandbox entity
         val sandbox = LightSwallowEntity(
@@ -62,6 +70,27 @@ class SandboxRunnableRequest(
             pathReplacement.forEach { (x, y) ->
                 it.sandboxParameter.paramPathReplace(x, y)
             }
+            it.sandboxParameter.paramPathReplace("{root}", chdirPath)
+        }
+
+        fun ensureIOFile(param: ProcessParameter, filePath: String): Boolean {
+            return if (param.redirectIOBeforeChroot) {
+                ensureFileExists(filePath)
+            } else {
+                if (filePath.isNotEmpty()) {
+                    ensureFileExists(Path(chdirPath, filePath).pathString)
+                } else false
+            }
+        }
+
+        // Make sure IO files exists
+        tasks.forEach {
+            if (!ensureIOFile(it.sandboxParameter, it.sandboxParameter.stdin))
+                it.sandboxParameter.stdin = ""
+            if (!ensureIOFile(it.sandboxParameter, it.sandboxParameter.stdout))
+                it.sandboxParameter.stdout = ""
+            if (!ensureIOFile(it.sandboxParameter, it.sandboxParameter.stderr))
+                it.sandboxParameter.stderr = ""
         }
 
         // Run and collect results
@@ -78,6 +107,14 @@ class SandboxRunnableRequest(
 
         val endTime = System.currentTimeMillis()
 
+        Thread.sleep(0)
+        System.gc()
+
+        if (deleteDirectoryWhenFinished) {
+            chdirFile.listFiles()?.forEach { it.delete() }
+            chdirFile.delete()
+        }
+
         // Run and build result
         return SandboxRunnableRequestResult(
             id = id,
@@ -90,10 +127,13 @@ class SandboxRunnableRequest(
 
 }
 
+val defaultProcessParameter = ProcessParameter() //useless, just for adding a non-params constructor
+
 data class SandboxRunnableRequestTask(
-    val id: String = UUID.randomUUID().toString(),
-    val sandboxParameter: ProcessParameter
-)
+    val sandboxParameter: ProcessParameter = defaultProcessParameter
+) {
+    val id: String = UUID.randomUUID().toString()
+}
 
 data class SandboxRunnableRequestResult(
     val id: String,

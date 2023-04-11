@@ -3,6 +3,7 @@ plugins {
 }
 
 description = "Daemon HTTP server for LightSwallow"
+version = "1.0.0-SNAPSHOT"
 
 val quarkusPlatformVersion: String by project
 
