@@ -48,7 +48,16 @@ class LightSwallowProcess(
             throw RuntimeException("Cannot start twice for same process")
         registerFlag = true
 
-        val arr = sandboxHook.startSandbox(parameter)
+        val arr = try {
+            sandboxHook.startSandbox(parameter)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            registerFlag = false
+            destroy()
+            System.err.println("Error happened inside sandbox native code")
+            return ProcessResult(ProcessResultType.RUNTIME_ERROR, -1, -1, -100)
+        }
+
         val startTime = System.currentTimeMillis()
 
         //Press WaitForProcess

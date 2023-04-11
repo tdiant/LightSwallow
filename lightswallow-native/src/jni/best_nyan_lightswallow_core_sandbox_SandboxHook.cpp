@@ -6,19 +6,15 @@
 #include <cstring>
 #include <unistd.h>
 
-using std::vector;
-using std::cout;
-using std::endl;
-
 JNIEXPORT jintArray JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook_startSandbox
         (JNIEnv *env, jobject obj, jobject paramSrcObj) {
 
-    cout << "Loading sandbox params..." << endl;
+    std::cout << "Loading sandbox params..." << std::endl;
     jobject paramsGlobalObj = env->NewGlobalRef(paramSrcObj);
     SandboxParameter params = TransParamFromJavaObj(env, paramsGlobalObj);
     env->DeleteGlobalRef(paramsGlobalObj);
 
-    cout << "Starting sandbox..." << endl;
+    std::cout << "Starting sandbox..." << std::endl;
 
     try {
         pid_t pid;
@@ -39,13 +35,14 @@ JNIEXPORT jintArray JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook
         return bufArr;
     }
     catch (std::exception &ex) {
-        cout << "Something wrong happened when starting." << endl;
-        cout << ex.what() << endl;
-        throw ex;
+        std::cerr << "Something wrong happened when starting." << std::endl;
+        std::cerr << ex.what() << std::endl;
+        throwJavaException(env, ex.what());
     }
     catch (...) {
-        throw std::runtime_error("Something unexpected happened while starting sandbox.");
+        throwJavaException(env, "Something unexpected happened while starting sandbox.");
     }
+    return nullptr;
 }
 
 JNIEXPORT jstring JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook_waitForProcess
@@ -90,10 +87,10 @@ JNIEXPORT jlong JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook_rea
     return maxUsageBytes - cacheUsage;
 }
 
-vector<MountPair> TransMountPairs(JNIEnv *env, const jobject &obj) {
+std::vector<MountPair> TransMountPairs(JNIEnv *env, const jobject &obj) {
     jobject listObj = GetFieldForListObject(env, obj, "mounts");
-    vector<jobject> objList = TransObjectList(env, listObj);
-    vector<MountPair> result;
+    std::vector<jobject> objList = TransObjectList(env, listObj);
+    std::vector<MountPair> result;
     for (auto &mpObj: objList) {
         MountPair mp;
         mp.sourcePath = TransString(env, GetFieldForString(env, mpObj, "sourcePath"));
@@ -136,4 +133,9 @@ void CallbackContainerPid(JNIEnv *env, const jobject &obj, const pid_t &pid) {
     jclass clz = env->GetObjectClass(obj);
     jmethodID mid = env->GetMethodID(clz, "callbackContainerPid", "(I)V");
     env->CallVoidMethod(obj, mid, pid);
+}
+
+void throwJavaException(JNIEnv *env, const char *msg) {
+    jclass c = env->FindClass("java/lang/RuntimeException");
+    env->ThrowNew(c, msg);
 }

@@ -30,6 +30,8 @@ SandboxParameter TransParamFromJavaObj(JNIEnv *env, const jobject &obj);
 
 void CallbackContainerPid(JNIEnv *env, const jobject &obj, const pid_t &pid);
 
+void throwJavaException(JNIEnv *env, const char *msg);
+
 #ifdef __cplusplus
 }
 #endif

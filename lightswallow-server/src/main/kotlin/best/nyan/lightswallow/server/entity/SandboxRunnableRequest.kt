@@ -2,6 +2,7 @@ package best.nyan.lightswallow.server.entity
 
 import best.nyan.lightswallow.core.LightSwallowEntity
 import best.nyan.lightswallow.core.LightSwallowEntityTask
+import best.nyan.lightswallow.core.SandboxStatus
 import best.nyan.lightswallow.core.process.ProcessParameter
 import best.nyan.lightswallow.core.result.ProcessResult
 import best.nyan.lightswallow.server.util.FileUtils.checkDirectoryExists
@@ -82,6 +83,17 @@ class SandboxRunnableRequest(
             homePath = homePath
         )
         sandbox.loadSandbox()
+        if (sandbox.status != SandboxStatus.READY) {
+            return SandboxRunnableRequestResult(
+                id = id,
+                startTime = startTime,
+                endTime = System.currentTimeMillis(),
+                success = false,
+                serverId = serverId,
+                result = mapOf(),
+                ioContent = mapOf()
+            )
+        }
 
         // Replace the paths
         tasks.forEach {
@@ -159,6 +171,7 @@ class SandboxRunnableRequest(
         // Run and build result
         return SandboxRunnableRequestResult(
             id = id,
+            success = true,
             startTime = startTime,
             endTime = endTime,
             serverId = serverId,
@@ -179,6 +192,7 @@ data class SandboxRunnableRequestTask(
 
 data class SandboxRunnableRequestResult(
     val id: String,
+    val success: Boolean,
     val startTime: Long,
     val endTime: Long,
     val serverId: String,

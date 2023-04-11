@@ -48,4 +48,12 @@ class SandboxHook {
         containerPid = pid
     }
 
+    /**
+     * This method is called by system itself,
+     * when errors happened inside sandbox native code
+     */
+    fun callbackNativeError(msg: String) {
+        System.err.println(msg)
+    }
+
 }

@@ -18,9 +18,14 @@ class LightSwallowEntity(
     val homePath: String
 ) {
 
+    /**
+     * Status for this entity
+     */
+    var status: SandboxStatus = SandboxStatus.DEAD
+        private set
+
     private val cgroupName get() = id.toString().replace("-", "")
 
-    private var status: SandboxStatus = SandboxStatus.DEAD
     private val sandboxCore: SandboxCore = SandboxCore(cgroupName)
 
     /**
