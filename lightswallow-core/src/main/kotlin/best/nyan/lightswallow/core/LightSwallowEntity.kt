@@ -7,6 +7,8 @@ import best.nyan.lightswallow.core.result.ProcessResult
 import best.nyan.lightswallow.core.result.ProcessResultType
 import best.nyan.lightswallow.core.sandbox.SandboxCore
 import java.util.*
+import kotlin.io.path.Path
+import kotlin.io.path.pathString
 
 /**
  * Entity for LightSwallow sandbox
@@ -68,6 +70,12 @@ class LightSwallowEntity(
         status = SandboxStatus.RUNNING
         task.sandboxParameter.name = cgroupName
         try {
+            // Create pipe
+            task.createdPipes.forEach { pipeName ->
+                sandboxCore.createPipe(Path(this@LightSwallowEntity.chdirPath, pipeName).pathString)
+            }
+
+            // Run process
             val result = sandboxCore.runProcess(
                 task.sandboxParameter.apply {
                     this.chrootPath = this@LightSwallowEntity.chrootPath
@@ -107,5 +115,6 @@ enum class SandboxStatus {
  */
 data class LightSwallowEntityTask(
     val id: String = UUID.randomUUID().toString(),
-    val sandboxParameter: ProcessParameter = ProcessParameter()
+    val sandboxParameter: ProcessParameter = ProcessParameter(),
+    val createdPipes: List<String> = listOf()
 )

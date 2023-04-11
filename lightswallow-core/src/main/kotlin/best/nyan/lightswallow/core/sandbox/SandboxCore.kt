@@ -89,6 +89,12 @@ class SandboxCore(
         sandboxHook.destroyEnvironment(name, true)
     }
 
+    fun createPipe(pipeName: String) {
+        sandboxHook.createNamedPipe(pipeName).apply {
+            if (!this) throw RuntimeException("Create pipe '$pipeName' failed")
+        }
+    }
+
     init {
         if (!loadSystemLibrariesFlag)
             throw Error("Please load libraries before using the core")

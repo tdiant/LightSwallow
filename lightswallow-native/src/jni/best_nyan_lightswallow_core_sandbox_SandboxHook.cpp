@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cstring>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 JNIEXPORT jintArray JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook_startSandbox
         (JNIEnv *env, jobject obj, jobject paramSrcObj) {
@@ -85,6 +87,11 @@ JNIEXPORT jlong JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook_rea
     std::map<string, int64_t> stat = ReadCgroupPropertyAsMap(cgroupInfo, "memory.stat");
     int64_t cacheUsage = stat["cache"];
     return maxUsageBytes - cacheUsage;
+}
+
+JNIEXPORT jboolean JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook_createNamedPipe
+        (JNIEnv *env, jobject obj, jstring pipeName) {
+    return mkfifo(TransString(env, pipeName).c_str(), 0777) == 0;
 }
 
 std::vector<MountPair> TransMountPairs(JNIEnv *env, const jobject &obj) {

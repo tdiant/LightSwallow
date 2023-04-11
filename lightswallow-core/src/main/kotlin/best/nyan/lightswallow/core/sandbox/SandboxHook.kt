@@ -34,6 +34,9 @@ class SandboxHook {
     @JvmName("readMemoryUsage")
     external fun readMemoryUsage(cgroupName: String): Long
 
+    @JvmName("createNamedPipe")
+    external fun createNamedPipe(pipeName: String): Boolean
+
     /**
      * PID for the running process container
      */
@@ -46,14 +49,6 @@ class SandboxHook {
      */
     fun callbackContainerPid(pid: Int) {
         containerPid = pid
-    }
-
-    /**
-     * This method is called by system itself,
-     * when errors happened inside sandbox native code
-     */
-    fun callbackNativeError(msg: String) {
-        System.err.println(msg)
     }
 
 }

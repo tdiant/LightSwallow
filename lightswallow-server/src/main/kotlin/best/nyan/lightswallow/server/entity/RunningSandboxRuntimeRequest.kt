@@ -1,5 +1,6 @@
 package best.nyan.lightswallow.server.entity
 
+import best.nyan.lightswallow.server.service.SandboxRunnableRequestResult
 import io.vertx.core.Future
 
 /**

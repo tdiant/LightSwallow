@@ -26,6 +26,9 @@ JNIEXPORT jlong JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook_rea
 JNIEXPORT jlong JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook_readMemoryUsage
         (JNIEnv *env, jobject obj, jstring cgroupName);
 
+JNIEXPORT jboolean JNICALL Java_best_nyan_lightswallow_core_sandbox_SandboxHook_createNamedPipe
+        (JNIEnv *env, jobject obj, jstring pipeName);
+
 SandboxParameter TransParamFromJavaObj(JNIEnv *env, const jobject &obj);
 
 void CallbackContainerPid(JNIEnv *env, const jobject &obj, const pid_t &pid);
