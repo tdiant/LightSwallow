@@ -6,6 +6,7 @@ import best.nyan.lightswallow.core.process.ProcessParameter
 import best.nyan.lightswallow.core.result.ProcessResult
 import best.nyan.lightswallow.server.util.FileUtils.checkDirectoryExists
 import best.nyan.lightswallow.server.util.FileUtils.ensureFileExists
+import best.nyan.lightswallow.server.util.FileUtils.readFileToString
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -40,7 +41,12 @@ class SandboxRunnableRequest(
     /**
      * Delete chdir directory when all processes done
      */
-    val deleteDirectoryWhenFinished: Boolean = true
+    val deleteDirectoryWhenFinished: Boolean = true,
+
+    /**
+     * Read content from IO files after all processes finished up
+     */
+    val readFromIOFiles: Boolean = false
 ) {
     /**
      * ID
@@ -83,6 +89,16 @@ class SandboxRunnableRequest(
             }
         }
 
+        fun ensureIOAbsolutePath(param: ProcessParameter, filePath: String): String? {
+            if (!ensureIOFile(param, filePath))
+                return null
+            return if (param.redirectIOBeforeChroot) {
+                filePath
+            } else {
+                Path(chdirPath, filePath).pathString
+            }
+        }
+
         // Make sure IO files exists
         tasks.forEach {
             if (!ensureIOFile(it.sandboxParameter, it.sandboxParameter.stdin))
@@ -107,6 +123,22 @@ class SandboxRunnableRequest(
 
         val endTime = System.currentTimeMillis()
 
+        val ioContentMap: Map<String, Map<String, String>> =
+            if (readFromIOFiles) {
+                buildMap {
+                    tasks.forEach { task ->
+                        put(task.id, buildMap {
+                            ensureIOAbsolutePath(task.sandboxParameter, task.sandboxParameter.stdout)?.let {
+                                put("out", readFileToString(it))
+                            }
+                            ensureIOAbsolutePath(task.sandboxParameter, task.sandboxParameter.stderr)?.let {
+                                put("err", readFileToString(it))
+                            }
+                        })
+                    }
+                }
+            } else mapOf()
+
         Thread.sleep(0)
         System.gc()
 
@@ -121,7 +153,8 @@ class SandboxRunnableRequest(
             startTime = startTime,
             endTime = endTime,
             serverId = serverId,
-            result = resultMap
+            result = resultMap,
+            ioContent = ioContentMap
         )
     }
 
@@ -140,5 +173,6 @@ data class SandboxRunnableRequestResult(
     val startTime: Long,
     val endTime: Long,
     val serverId: String,
-    val result: Map<String, ProcessResult>
+    val result: Map<String, ProcessResult>,
+    val ioContent: Map<String, Map<String, String>>
 )
