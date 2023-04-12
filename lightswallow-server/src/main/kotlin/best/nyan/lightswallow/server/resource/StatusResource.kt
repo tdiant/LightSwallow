@@ -3,7 +3,7 @@ package best.nyan.lightswallow.server.resource
 import best.nyan.lightswallow.server.config.AppConfig
 import best.nyan.lightswallow.server.entity.RunningSandboxRuntimeRequest
 import best.nyan.lightswallow.server.entity.SandboxRunnableRequest
-import best.nyan.lightswallow.server.entity.SandboxRunnableRequestResult
+import best.nyan.lightswallow.server.service.SandboxRunnableRequestResult
 import best.nyan.lightswallow.server.service.SandboxRunnableRequestService
 import org.jboss.resteasy.reactive.RestResponse
 import javax.enterprise.context.RequestScoped

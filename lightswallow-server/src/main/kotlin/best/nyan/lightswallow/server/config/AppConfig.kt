@@ -29,7 +29,13 @@ class AppConfig(
      * API Secret Key
      */
     @ConfigProperty(name = "app.secret-key", defaultValue = "")
-    val secretKey: String
+    val secretKey: String,
+
+    /**
+     * Temp file directory
+     */
+    @ConfigProperty(name = "app.path.temp-files")
+    val tempFilePath: String
 
 ) {
 

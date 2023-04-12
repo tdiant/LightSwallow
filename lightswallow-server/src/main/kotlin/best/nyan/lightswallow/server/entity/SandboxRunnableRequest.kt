@@ -45,7 +45,7 @@ class SandboxRunnableRequest(
     /**
      * Prepare files, written to sandbox before launching processes
      */
-    val prepareFiles: Map<String, String> = mapOf()
+    val prepareFiles: Map<String, String> = mapOf(),
 )
 
 val defaultProcessParameter = ProcessParameter() //useless, just for adding a non-params constructor

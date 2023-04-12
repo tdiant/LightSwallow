@@ -14,6 +14,8 @@ import best.nyan.lightswallow.server.util.FileUtils
 import io.vertx.core.Promise
 import java.io.File
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.concurrent.Executors
 import javax.enterprise.context.ApplicationScoped
 import kotlin.io.path.Path
@@ -58,6 +60,14 @@ class SandboxRunnableRequestService(
         val chrootPath = request.chrootPath
         val chdirRootPath = request.chdirRootPath
         val chdirPath = Path(chdirRootPath, request.id).pathString
+        val chdirFile = File(chdirPath)
+
+        // Prepared files
+        request.prepareFiles.forEach { (filename, tempFileUUID) ->
+            val tempFile = Path(appConfig.tempFilePath, tempFileUUID)
+            val targetPath = Path(chdirPath, filename)
+            Files.move(tempFile, targetPath, StandardCopyOption.REPLACE_EXISTING)
+        }
 
         // Create sandbox entity
         val sandbox = LightSwallowEntity(
@@ -104,6 +114,13 @@ class SandboxRunnableRequestService(
             }
         }
 
+        Thread.sleep(0)
+        System.gc()
+        if (request.deleteDirectoryWhenFinished) {
+            chdirFile.listFiles()?.forEach { it.delete() }
+            chdirFile.delete()
+        }
+
         val endTime = System.currentTimeMillis()
 
         return SandboxRunnableRequestResult(
@@ -115,17 +132,6 @@ class SandboxRunnableRequestService(
         )
 
     }
-
-
-    //
-    //        Thread.sleep(0)
-    //        System.gc()
-    //
-    //        if (deleteDirectoryWhenFinished) {
-    //            chdirFile.listFiles()?.forEach { it.delete() }
-    //            chdirFile.delete()
-    //        }
-    //
 
     private fun runAndWaitRequestSingleTask(
         req: SandboxRunnableRequest,
@@ -156,12 +162,6 @@ class SandboxRunnableRequestService(
 
         val chdirFile = File(chdirPath)
         chdirFile.mkdirs()
-
-        // Prepared files
-        req.prepareFiles.forEach { (filename, content) ->
-            val filePath = Path(chdirPath, filename).pathString
-            FileUtils.writeStringToFile(content, filePath)
-        }
 
         // Replace the paths
         req.pathReplacement.forEach { (x, y) ->
